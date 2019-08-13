@@ -11,6 +11,9 @@ const unexpectedError_1 = require("./unexpectedError");
 const schema_1 = require("./schema");
 const he_1 = require("he");
 const iconv_lite_1 = require("iconv-lite");
+const fetch = require('node-fetch');
+// import AbortController from 'abort-controller';
+
 function unfurl(url, opts) {
     if (opts === undefined) {
         opts = {};
@@ -35,12 +38,28 @@ function unfurl(url, opts) {
 }
 exports.unfurl = unfurl;
 async function getPage(url, opts) {
-    const res = await cross_fetch_1.default(url, {
+  /*  const res = await cross_fetch_1.default(url, {
         headers: {
             Accept: "text/html, application/xhtml+xml",
             "User-Agent": opts.userAgent
         }
     });
+*/
+
+
+    const res = await fetch(url, {
+        headers: {
+            Accept: "text/html, application/xhtml+xml",
+            "User-Agent": opts.userAgent
+        },
+        timeout: opts.timeout,
+        follow: opts.follow,
+        size: opts.size
+    });
+
+
+
+
     const buf = Buffer.from(await res.arrayBuffer());
     const contentType = res.headers.get("Content-Type");
     const contentLength = res.headers.get("Content-Length");
@@ -83,14 +102,31 @@ async function getPage(url, opts) {
     return buf.toString();
 }
 function getRemoteMetadata(ctx, opts) {
+
     return async function (metadata) {
         if (!ctx._oembed) {
             return metadata;
         }
         const target = url_1.resolve(ctx.url, ctx._oembed.href);
-        const res = await cross_fetch_1.default(target);
+
+  /*      const res = await cross_fetch_1.default(target);
         const contentType = res.headers.get("Content-Type");
         const contentLength = res.headers.get("Content-Length");
+*/
+
+const res = await fetch(target, {
+    headers: {
+        Accept: "text/html, application/xhtml+xml",
+        "User-Agent": opts.userAgent
+    },
+    timeout: opts.timeout,
+    follow: opts.follow,
+    size: opts.size
+});
+
+const contentType = res.headers.get("Content-Type");
+const contentLength = res.headers.get("Content-Length");
+
         let ret;
         if (ctx._oembed.type === "application/json+oembed" &&
             /application\/json/.test(contentType)) {
@@ -282,7 +318,7 @@ function parse(ctx) {
                     if (!target[item.parent][item.category]) {
                         target[item.parent][item.category] = {};
                     }
-                    target = target[item.parent][item.category];
+                    target =  target[item.parent][item.category];
                 }
                 else {
                     if (Array.isArray(target[item.parent]) === false) {

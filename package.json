@@ -12,7 +12,8 @@
     "he": "^1.2.0",
     "htmlparser2": "^3.9.2",
     "iconv-lite": "^0.4.24",
-    "source-map-support": "^0.5.9"
+    "source-map-support": "^0.5.9",
+    "node-fetch": "^2.6.0"
   },
   "devDependencies": {
     "@types/jest": "^23.3.2",
